@@ -1,0 +1,16 @@
+contrib/*
+prefix/*
+Debug
+Release
+x64
+
+*.a
+*.exe
+*.dll
+*.lib
+*.o
+*.obj
+*.so
+*.suo
+*.VC.db
+*.VC.opendb
