@@ -2,6 +2,7 @@
   #define _FILE_OFFSET_BITS 64
 #endif // _WIN32
 
+#include <cstddef>
 #include <cstdio>
 #include <utility>
 #include <sys/stat.h>
