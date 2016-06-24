@@ -9,4 +9,4 @@ bool path_exists(const std::string &path);
 
 std::string path_canonicalize(const std::string &path);
 
-#endif PATH_H_
+#endif // PATH_H_
