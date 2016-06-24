@@ -77,7 +77,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\src\imagine;$(SolutionDir)..\prefix\$(Configuration)\$(Platform)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\src\imagine;$(ProjectDir)..\..\extra;$(SolutionDir)..\prefix\$(Configuration)\$(Platform)\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>OPJ_STATIC;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -93,7 +93,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\src\imagine;$(SolutionDir)..\prefix\$(Configuration)\$(Platform)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\src\imagine;$(ProjectDir)..\..\extra;$(SolutionDir)..\prefix\$(Configuration)\$(Platform)\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>OPJ_STATIC;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -111,7 +111,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\src\imagine;$(SolutionDir)..\prefix\$(Configuration)\$(Platform)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\src\imagine;$(ProjectDir)..\..\extra;$(SolutionDir)..\prefix\$(Configuration)\$(Platform)\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>OPJ_STATIC;_CRT_SECURE_NO_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -131,7 +131,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\src\imagine;$(SolutionDir)..\prefix\$(Configuration)\$(Platform)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\src\imagine;$(ProjectDir)..\..\extra;$(SolutionDir)..\prefix\$(Configuration)\$(Platform)\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>OPJ_STATIC;_CRT_SECURE_NO_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -145,16 +145,21 @@
     <CustomBuildStep />
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\extra\libp2p\p2p.cpp" />
+    <ClCompile Include="..\..\extra\libp2p\v210.cpp" />
     <ClCompile Include="..\..\src\imagine\api\imagine.cpp" />
     <ClCompile Include="..\..\src\imagine\common\decoder.cpp" />
     <ClCompile Include="..\..\src\imagine\common\file_io.cpp" />
     <ClCompile Include="..\..\src\imagine\common\io_context.cpp" />
     <ClCompile Include="..\..\src\imagine\common\jumpman.cpp" />
     <ClCompile Include="..\..\src\imagine\provider\jpeg_decoder.cpp" />
+    <ClCompile Include="..\..\src\imagine\provider\png_decoder.cpp" />
     <ClCompile Include="..\..\src\imagine\provider\yuv_decoder.cpp" />
     <ClCompile Include="linktest.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\extra\libp2p\p2p.h" />
+    <ClInclude Include="..\..\extra\libp2p\p2p_api.h" />
     <ClInclude Include="..\..\src\imagine\api\imagine.h" />
     <ClInclude Include="..\..\src\imagine\common\align.h" />
     <ClInclude Include="..\..\src\imagine\common\buffer.h" />
@@ -167,6 +172,7 @@
     <ClInclude Include="..\..\src\imagine\common\io_context.h" />
     <ClInclude Include="..\..\src\imagine\common\jumpman.h" />
     <ClInclude Include="..\..\src\imagine\provider\jpeg_decoder.h" />
+    <ClInclude Include="..\..\src\imagine\provider\png_decoder.h" />
     <ClInclude Include="..\..\src\imagine\provider\yuv_decoder.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

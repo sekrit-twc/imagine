@@ -31,6 +31,18 @@
     <Filter Include="Source Files\provider">
       <UniqueIdentifier>{50ff0e9f-798e-4e08-a373-5e52dcd1daa0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\extra">
+      <UniqueIdentifier>{44f53854-9a79-4623-b0af-7f9270e25df3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\extra">
+      <UniqueIdentifier>{e601e867-49fe-4904-9900-449f3ff6206c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\extra\libp2p">
+      <UniqueIdentifier>{d8d50fc8-e918-4897-a091-29fb46a1d438}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\extra\libp2p">
+      <UniqueIdentifier>{64717018-4c80-4e9c-96e4-ad26f47b52b3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="linktest.cpp">
@@ -54,8 +66,17 @@
     <ClCompile Include="..\..\src\imagine\provider\jpeg_decoder.cpp">
       <Filter>Source Files\provider</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\imagine\provider\png_decoder.cpp">
+      <Filter>Source Files\provider</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\imagine\common\jumpman.cpp">
       <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\extra\libp2p\p2p.cpp">
+      <Filter>Source Files\extra\libp2p</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\extra\libp2p\v210.cpp">
+      <Filter>Source Files\extra\libp2p</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -95,8 +116,17 @@
     <ClInclude Include="..\..\src\imagine\common\align.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\imagine\provider\png_decoder.h">
+      <Filter>Header Files\provider</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\imagine\common\jumpman.h">
       <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\extra\libp2p\p2p.h">
+      <Filter>Header Files\extra\libp2p</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\extra\libp2p\p2p_api.h">
+      <Filter>Header Files\extra\libp2p</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

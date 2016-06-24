@@ -1,6 +1,7 @@
 #include <cstring>
 #include <utility>
 #include "provider/jpeg_decoder.h"
+#include "provider/png_decoder.h"
 #include "provider/yuv_decoder.h"
 #include "decoder.h"
 #include "except.h"
@@ -23,6 +24,9 @@ void ImageDecoderRegistry::register_default_providers() try
 {
 #ifdef IMAGINE_JPEG_ENABLED
 	register_provider(std::unique_ptr<ImageDecoderFactory>{ new JPEGDecoderFactory{} });
+#endif
+#ifdef IMAGINE_PNG_ENABLED
+	register_provider(std::unique_ptr<ImageDecoderFactory>{ new PNGDecoderFactory{} });
 #endif
 	register_provider(std::unique_ptr<ImageDecoderFactory>{ new YUVDecoderFactory{} });
 } catch (const std::bad_alloc &) {
