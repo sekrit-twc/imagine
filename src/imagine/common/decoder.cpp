@@ -22,9 +22,9 @@ ImageDecoderFactory::~ImageDecoderFactory() = default;
 void ImageDecoderRegistry::register_default_providers() try
 {
 #ifdef IMAGINE_JPEG_ENABLED
-	register_provider(std::unique_ptr<ImageDecoderFactory>{ new JPEGDecoderFactory{}});
+	register_provider(std::unique_ptr<ImageDecoderFactory>{ new JPEGDecoderFactory{} });
 #endif
-	register_provider(std::unique_ptr<ImageDecoderFactory>(new YUVDecoderFactory{}));
+	register_provider(std::unique_ptr<ImageDecoderFactory>{ new YUVDecoderFactory{} });
 } catch (const std::bad_alloc &) {
 	throw error::OutOfMemory{};
 }

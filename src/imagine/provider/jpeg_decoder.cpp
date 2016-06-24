@@ -14,6 +14,7 @@
 #include "common/except.h"
 #include "common/format.h"
 #include "common/io_context.h"
+#include "common/jumpman.h"
 #include "provider/jpeg_decoder.h"
 
 #ifdef IMAGINE_JPEG_ENABLED
@@ -102,24 +103,22 @@ ColorFamily translate_jcs_color(J_COLOR_SPACE color)
 	}
 }
 
-class JpegDecoder : public ImageDecoder {
+class JPEGDecoder : public ImageDecoder {
 	jpeg_decompress_struct m_jpeg;
 	jpeg_source_mgr m_jpeg_source;
 	jpeg_error_mgr m_jpeg_error;
-	std::exception_ptr m_exception;
-	std::jmp_buf m_setjmp;
 
 	std::unique_ptr<IOContext> m_io;
 	std::vector<JOCTET> m_buffer;
 	FileFormat m_format;
-	bool m_jump_active;
+	Jumpman m_jumpman;
 	bool m_alive;
 
 	static void init_source(j_decompress_ptr) {}
 
 	static boolean fill_input_buffer(j_decompress_ptr cinfo)
 	{
-		JpegDecoder *d = static_cast<JpegDecoder *>(cinfo->client_data);
+		JPEGDecoder *d = static_cast<JPEGDecoder *>(cinfo->client_data);
 		bool eof = false;
 
 		try {
@@ -128,7 +127,7 @@ class JpegDecoder : public ImageDecoder {
 			if (d->m_io->eof())
 				eof = true;
 		} catch (...) {
-			d->m_exception = std::current_exception();
+			d->m_jumpman.store_exception();
 			eof = true;
 		}
 
@@ -141,7 +140,7 @@ class JpegDecoder : public ImageDecoder {
 
 	static void skip_input_data(j_decompress_ptr cinfo, long num_bytes)
 	{
-		JpegDecoder *d = static_cast<JpegDecoder *>(cinfo->client_data);
+		JPEGDecoder *d = static_cast<JPEGDecoder *>(cinfo->client_data);
 		bool eof = false;
 
 		try {
@@ -150,7 +149,7 @@ class JpegDecoder : public ImageDecoder {
 			else
 				discard_from_io(d->m_io.get(), num_bytes);
 		} catch (...) {
-			d->m_exception = std::current_exception();
+			d->m_jumpman.store_exception();
 			eof = true;
 		}
 
@@ -164,32 +163,8 @@ class JpegDecoder : public ImageDecoder {
 
 	static void error_exit(j_common_ptr ptr)
 	{
-		JpegDecoder *d = static_cast<JpegDecoder *>(ptr->client_data);
-		if (d->m_jump_active)
-			std::longjmp(d->m_setjmp, 1);
-	}
-
-	template <class T, class ...Args>
-	typename std::result_of<T(Args...)>::type call_jpeglib(T func, Args &&...args)
-	{
-		if (setjmp(m_setjmp)) {
-			m_jump_active = false;
-			throw error::CannotDecodeImage{ "jpeglib error" };
-		}
-
-		m_jump_active = true;
-		m_exception = nullptr;
-
-		typename invoke_function<T, Args...>::stack_type ret;
-		invoke_function<T, Args...>::invoke(&ret, func, std::forward<Args>(args)...);
-		m_jump_active = false;
-
-		if (m_exception) {
-			std::exception_ptr ex = nullptr;
-			std::swap(ex, m_exception);
-			std::rethrow_exception(ex);
-		}
-		return static_cast<typename std::result_of<T(Args...)>::type>(ret);
+		JPEGDecoder *d = static_cast<JPEGDecoder *>(ptr->client_data);
+		d->m_jumpman.handle_exception();
 	}
 
 	void decode_header()
@@ -197,14 +172,14 @@ class JpegDecoder : public ImageDecoder {
 		if (!m_alive)
 			return;
 
-		if (call_jpeglib(jpeg_read_header, &m_jpeg, TRUE) != JPEG_HEADER_OK)
+		if (m_jumpman.call(jpeg_read_header, &m_jpeg, TRUE) != JPEG_HEADER_OK)
 			throw error::InternalError{ "jpeglib did not return JPEG_HEADER_OK" };
 		if (m_jpeg.num_components == 0)
 			throw error::InternalError{ "jpeglib returned 0 planes" };
 		if (m_jpeg.num_components > MAX_PLANE_COUNT)
 			throw error::TooManyImagePlanes{ "maximum plane count exceeded" };
 
-		call_jpeglib(jpeg_calc_output_dimensions, &m_jpeg);
+		m_jumpman.call(jpeg_calc_output_dimensions, &m_jpeg);
 
 		m_format.plane_count = m_jpeg.num_components;
 		for (unsigned p = 0; p < m_format.plane_count; ++p) {
@@ -227,34 +202,33 @@ class JpegDecoder : public ImageDecoder {
 		m_alive = false;
 	}
 public:
-	explicit JpegDecoder(std::unique_ptr<IOContext> io) :
+	explicit JPEGDecoder(std::unique_ptr<IOContext> io) :
 		m_jpeg{},
 		m_jpeg_source{},
 		m_jpeg_error{},
-		m_setjmp{},
 		m_io{ std::move(io) },
 		m_buffer(JPEG_BUFFER_SIZE),
 		m_format{ ImageType::JPEG, 1 },
-		m_jump_active{},
+		m_jumpman{ [](void *) { throw error::CannotDecodeImage{ "jpeglib error" }; } , nullptr },
 		m_alive{}
 	{
 		jpeg_std_error(&m_jpeg_error);
-		m_jpeg_error.error_exit = &JpegDecoder::error_exit;
+		m_jpeg_error.error_exit = &JPEGDecoder::error_exit;
 		m_jpeg.err = &m_jpeg_error;
 
 		jpeg_create_decompress(&m_jpeg);
 		m_jpeg.client_data = this;
 		m_alive = true;
 
-		m_jpeg_source.init_source = &JpegDecoder::init_source;
-		m_jpeg_source.fill_input_buffer = &JpegDecoder::fill_input_buffer;
-		m_jpeg_source.skip_input_data = &JpegDecoder::skip_input_data;
+		m_jpeg_source.init_source = &JPEGDecoder::init_source;
+		m_jpeg_source.fill_input_buffer = &JPEGDecoder::fill_input_buffer;
+		m_jpeg_source.skip_input_data = &JPEGDecoder::skip_input_data;
 		m_jpeg_source.resync_to_restart = jpeg_resync_to_restart;
-		m_jpeg_source.term_source = &JpegDecoder::term_source;
+		m_jpeg_source.term_source = &JPEGDecoder::term_source;
 		m_jpeg.src = &m_jpeg_source;
 	}
 
-	~JpegDecoder()
+	~JPEGDecoder()
 	{
 		done();
 	}
@@ -285,7 +259,7 @@ public:
 		m_jpeg.raw_data_out = TRUE;
 		m_jpeg.output_width = m_jpeg.image_width;
 		m_jpeg.output_height = m_jpeg.image_height;
-		call_jpeglib(jpeg_start_decompress, &m_jpeg);
+		m_jumpman.call(jpeg_start_decompress, &m_jpeg);
 
 		unsigned vstep = DCTSIZE * m_jpeg.max_v_samp_factor;
 		JSAMPROW row_index[MAX_PLANE_COUNT][DCTSIZE * MAX_SAMP_FACTOR];
@@ -309,9 +283,9 @@ public:
 					++row_offset;
 				}
 			}
-			i += call_jpeglib(jpeg_read_raw_data, &m_jpeg, plane_index, vstep);
+			i += m_jumpman.call(jpeg_read_raw_data, &m_jpeg, plane_index, vstep);
 		}
-		call_jpeglib(jpeg_finish_decompress, &m_jpeg);
+		m_jumpman.call(jpeg_finish_decompress, &m_jpeg);
 		done();
 	} catch (const std::bad_alloc &) {
 		throw error::OutOfMemory{};
@@ -342,7 +316,7 @@ std::unique_ptr<ImageDecoder> JPEGDecoderFactory::create_decoder(const char *pat
 	else
 		recognized = is_jpeg_extension(path);
 
-	return recognized ? std::unique_ptr<ImageDecoder>{ new JpegDecoder{ std::move(io) } } : nullptr;
+	return recognized ? std::unique_ptr<ImageDecoder>{ new JPEGDecoder{ std::move(io) } } : nullptr;
 } catch (const std::bad_alloc &) {
 	throw error::OutOfMemory{};
 }

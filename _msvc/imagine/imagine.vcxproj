@@ -149,6 +149,7 @@
     <ClCompile Include="..\..\src\imagine\common\decoder.cpp" />
     <ClCompile Include="..\..\src\imagine\common\file_io.cpp" />
     <ClCompile Include="..\..\src\imagine\common\io_context.cpp" />
+    <ClCompile Include="..\..\src\imagine\common\jumpman.cpp" />
     <ClCompile Include="..\..\src\imagine\provider\jpeg_decoder.cpp" />
     <ClCompile Include="..\..\src\imagine\provider\yuv_decoder.cpp" />
     <ClCompile Include="linktest.cpp" />
@@ -164,6 +165,7 @@
     <ClInclude Include="..\..\src\imagine\common\format.h" />
     <ClInclude Include="..\..\src\imagine\common\im_assert.h" />
     <ClInclude Include="..\..\src\imagine\common\io_context.h" />
+    <ClInclude Include="..\..\src\imagine\common\jumpman.h" />
     <ClInclude Include="..\..\src\imagine\provider\jpeg_decoder.h" />
     <ClInclude Include="..\..\src\imagine\provider\yuv_decoder.h" />
   </ItemGroup>
