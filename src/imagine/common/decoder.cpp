@@ -1,5 +1,6 @@
 #include <cstring>
 #include <utility>
+#include "provider/bmp_decoder.h"
 #include "provider/jpeg_decoder.h"
 #include "provider/png_decoder.h"
 #include "provider/yuv_decoder.h"
@@ -22,6 +23,7 @@ ImageDecoderFactory::~ImageDecoderFactory() = default;
 
 void ImageDecoderRegistry::register_default_providers() try
 {
+	register_provider(std::unique_ptr<ImageDecoderFactory>{ new BMPDecoderFactory{} });
 #ifdef IMAGINE_JPEG_ENABLED
 	register_provider(std::unique_ptr<ImageDecoderFactory>{ new JPEGDecoderFactory{} });
 #endif

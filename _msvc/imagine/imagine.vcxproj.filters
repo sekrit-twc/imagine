@@ -78,6 +78,9 @@
     <ClCompile Include="..\..\extra\libp2p\v210.cpp">
       <Filter>Source Files\extra\libp2p</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\imagine\provider\bmp_decoder.cpp">
+      <Filter>Source Files\provider</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\imagine\api\imagine.h">
@@ -127,6 +130,9 @@
     </ClInclude>
     <ClInclude Include="..\..\extra\libp2p\p2p_api.h">
       <Filter>Header Files\extra\libp2p</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\imagine\provider\bmp_decoder.h">
+      <Filter>Header Files\provider</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
