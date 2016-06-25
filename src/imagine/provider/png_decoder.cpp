@@ -172,6 +172,9 @@ class PNGDecoder : public ImageDecoder {
 		png_size_t rowsize = png_get_rowbytes(m_png, m_png_info);
 		std::vector<uint8_t> row(rowsize);
 
+		if (SIZE_MAX / rowsize < m_format.plane[0].height)
+			throw error::OutOfMemory{};
+
 		void *dst_p[MAX_PLANE_COUNT] = {};
 		for (unsigned p = 0; p < m_format.plane_count; ++p) {
 			dst_p[p] = buffer.data[p];

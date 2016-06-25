@@ -261,6 +261,9 @@ public:
 		m_jpeg.output_height = m_jpeg.image_height;
 		m_jumpman.call(jpeg_start_decompress, &m_jpeg);
 
+		if (SIZE_MAX / m_jpeg.output_width < m_jpeg.output_height)
+			throw error::OutOfMemory{};
+
 		unsigned vstep = DCTSIZE * m_jpeg.max_v_samp_factor;
 		JSAMPROW row_index[MAX_PLANE_COUNT][DCTSIZE * MAX_SAMP_FACTOR];
 		JSAMPARRAY plane_index[MAX_PLANE_COUNT] = {
