@@ -144,10 +144,20 @@ class JPEGDecoder : public ImageDecoder {
 		bool eof = false;
 
 		try {
-			if (d->m_io->seekable())
-				d->m_io->seek_rel(num_bytes);
-			else
-				discard_from_io(d->m_io.get(), num_bytes);
+			if (static_cast<size_t>(num_bytes) <= cinfo->src->bytes_in_buffer) {
+				cinfo->src->bytes_in_buffer -= num_bytes;
+				cinfo->src->next_input_byte += num_bytes;
+			} else {
+				long seek = num_bytes - static_cast<long>(cinfo->src->bytes_in_buffer);
+
+				if (d->m_io->seekable())
+					d->m_io->seek_rel(seek);
+				else
+					discard_from_io(d->m_io.get(), seek);
+
+				cinfo->src->bytes_in_buffer = 0;
+				cinfo->src->next_input_byte = d->m_buffer.data();
+			}
 		} catch (...) {
 			d->m_jumpman.store_exception();
 			eof = true;
@@ -183,7 +193,6 @@ class JPEGDecoder : public ImageDecoder {
 
 		m_format.plane_count = m_jpeg.num_components;
 		for (unsigned p = 0; p < m_format.plane_count; ++p) {
-			// Fix incorrect image dimensions.
 			JDIMENSION w = (m_jpeg.image_width * m_jpeg.comp_info[p].h_samp_factor) / m_jpeg.max_h_samp_factor;
 			JDIMENSION h = (m_jpeg.image_height * m_jpeg.comp_info[p].v_samp_factor) / m_jpeg.max_v_samp_factor;
 
