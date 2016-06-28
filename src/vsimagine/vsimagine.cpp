@@ -157,7 +157,7 @@ std::tuple<int, int, const VSFormat *> adjust_imformat(const imagine::FrameForma
 	unsigned subsample_w = 0;
 	unsigned subsample_h = 0;
 
-	if (depth > 32 || (st == stFloat && depth != 16 && depth != 32))
+	if (depth < 8 || depth > 32 || (st == stFloat && depth != 16 && depth != 32))
 		throw std::runtime_error{ "unsupported bit depth" };
 
 	if (imformat.plane_count >= 3 &&
@@ -168,9 +168,8 @@ std::tuple<int, int, const VSFormat *> adjust_imformat(const imagine::FrameForma
 		throw std::runtime_error{ "4-plane formats not supported" };
 
 	VSColorFamily cf = match_color_family(imformat);
-	if (cf == cmGray) {
+	if (cf == cmGray)
 		return{ w, h, core.register_format(cf, st, depth, 0, 0) };
-	}
 
 	for (unsigned p = 1; p < imformat.plane_count; ++p) {
 		if (imformat.plane[p].width > w || imformat.plane[p].height > h)
@@ -200,7 +199,7 @@ std::tuple<int, int, const VSFormat *> adjust_imformat(const imagine::FrameForma
 	    (h != imformat.plane[1].height << subsample_h && h != (imformat.plane[1].height + 1) << subsample_h))
 		throw std::runtime_error{ "unsupported subsampling" };
 
-	if ((subsample_w || subsample_h) && cf == cmRGB)
+	if (cf == cmRGB && (subsample_w || subsample_h))
 		throw std::runtime_error{ "subsampled RGB not supported" };
 	return{ w, h, core.register_format(cf, st, depth, subsample_w, subsample_h) };
 }
@@ -332,10 +331,14 @@ public:
 		int64_t fpsnum = in.get_prop<int64_t>("fpsnum", map::Ignore{});
 		int64_t fpsden = in.get_prop<int64_t>("fpsden", map::Ignore{});
 		int initial = in.get_prop<int>("initial", map::default_val(-1));
-		bool constant = in.get_prop<bool>("constant", map::Ignore{});
+		bool constant = in.get_prop<bool>("constant", map::default_val(true));
 
 		if ((fpsnum <= 0) != (fpsden <= 0))
 			throw std::runtime_error{ "must specify both fpsnum and fpsden" };
+		if (fpsnum <= 0 && fpsden <= 0) {
+			fpsnum = 25;
+			fpsden = 1;
+		}
 
 		m_format_str = FormatString{ path };
 
