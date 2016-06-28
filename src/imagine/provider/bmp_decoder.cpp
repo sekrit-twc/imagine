@@ -56,6 +56,36 @@ template <class T>
 T to_le(T x) { return x; }
 #endif // BIG_ENDIAN
 
+template <class T>
+unsigned bsf(T x)
+{
+	for (unsigned i = 0; i < std::numeric_limits<T>::digits; ++i) {
+		if (x & (static_cast<T>(1) << i))
+			return i;
+	}
+	return 0;
+}
+
+template <class T>
+unsigned bsr(T x)
+{
+	for (unsigned i = std::numeric_limits<T>::digits; i != 0; --i) {
+		if (x & (static_cast<T>(1) << (i - 1)))
+			return i;
+	}
+	return 0;
+}
+
+template <class T>
+T lsb_mask(unsigned n)
+{
+	if (!n)
+		return 0;
+
+	return ~static_cast<T>(0) >> (std::numeric_limits<T>::digits - n);
+}
+
+
 using packed_rgb555 = p2p::pack_traits<
 	uint8_t, uint16_t, p2p::little_endian_t, 1, 0,
 	p2p::make_mask(p2p::C__, p2p::C_R, p2p::C_G, p2p::C_B),
@@ -285,10 +315,18 @@ BitmapVersion check_bi_size(DWORD sz)
 	}
 }
 
+std::pair<unsigned, unsigned> decode_bitfield(DWORD bitfield)
+{
+	if (!bitfield)
+		return{ 0, 0 };
+
+	return{ bsr(bitfield) - bsf(bitfield), bsf(bitfield) };
+}
+
 template <unsigned N>
 void depalettize(void * const dst[3], const void *src, DWORD width, const RGBQUAD pal[256])
 {
-	const unsigned mask = ~(0U) >> (std::numeric_limits<unsigned>::digits - N);
+	const unsigned mask = lsb_mask<unsigned>(N);
 
 	uint8_t *dst_p[3] = { static_cast<uint8_t *>(dst[0]), static_cast<uint8_t *>(dst[1]), static_cast<uint8_t *>(dst[2]) };
 	const uint8_t *src_p = static_cast<const uint8_t *>(src);
@@ -300,6 +338,25 @@ void depalettize(void * const dst[3], const void *src, DWORD width, const RGBQUA
 		dst_p[0][i] = val.rgbRed;
 		dst_p[1][i] = val.rgbGreen;
 		dst_p[2][i] = val.rgbBlue;
+	}
+}
+
+template <class T>
+void unpack_bitfield(const void *src, void * const dst[4], DWORD width, std::pair<unsigned, unsigned> spec[4])
+{
+	const T *src_p = static_cast<const T *>(src);
+	uint8_t *dst_p[4] = {
+		static_cast<uint8_t *>(dst[0]), static_cast<uint8_t *>(dst[1]), static_cast<uint8_t *>(dst[2]), static_cast<uint8_t *>(dst[3]),
+	};
+
+	for (DWORD i = 0; i < width; ++i) {
+		T x = to_le(src_p[i]);
+		dst_p[0][i] = (x >> spec[0].second) & lsb_mask<T>(spec[0].first);
+		dst_p[1][i] = (x >> spec[1].second) & lsb_mask<T>(spec[1].first);
+		dst_p[2][i] = (x >> spec[2].second) & lsb_mask<T>(spec[2].first);
+
+		if (dst_p[3] && spec[3].first)
+			dst_p[3][i] = (x >> spec[3].second) & lsb_mask<T>(spec[3].first);
 	}
 }
 
@@ -399,7 +456,7 @@ class BMPDecoder : public ImageDecoder {
 			throw error::CannotDecodeImage{ "unknown biBitCount" };
 		}
 
-		if (m_bmp_info_header.biCompression != BI_RGB)
+		if (m_bmp_info_header.biCompression != BI_RGB && m_bmp_info_header.biCompression != BI_BITFIELDS)
 			throw error::CannotDecodeImage{ "BMP compression not supported" };
 		if (m_bmp_info_header.biCompression == BI_RLE8 && m_bmp_info_header.biBitCount != 8)
 			throw error::CannotCreateCodec{ "BI_RLE8 requires 8-bit bitmap" };
@@ -434,6 +491,33 @@ class BMPDecoder : public ImageDecoder {
 			m_format.plane[p].width = m_bmp_info_header.biWidth;
 			m_format.plane[p].height = m_bmp_info_header.biHeight;
 			m_format.plane[p].bit_depth = depth;
+		}
+
+		if (m_bmp_info_header.biCompression == BI_BITFIELDS) {
+			if (m_bmp_info_header.biBitCount == 16) {
+				const DWORD high_mask = 0xFFFF0000UL;
+
+				if ((m_bmp_info_header.bV2RedMask & high_mask) || (m_bmp_info_header.bV2GreenMask & high_mask) || (m_bmp_info_header.bV2BlueMask & high_mask))
+					throw error::CannotDecodeImage{ "high WORD set in 16-bit BI_BITFIELDS" };
+				if (m_bmp_version >= BitmapVersion::INFOV3 && (m_bmp_info_header.bV3AlphaMask & high_mask))
+					throw error::CannotDecodeImage{ "high WORD set in 16-bit BI_BITFIELDS" };
+			}
+
+			m_format.plane[0].bit_depth = decode_bitfield(m_bmp_info_header.bV2RedMask).first;
+			m_format.plane[1].bit_depth = decode_bitfield(m_bmp_info_header.bV2GreenMask).first;
+			m_format.plane[2].bit_depth = decode_bitfield(m_bmp_info_header.bV2BlueMask).first;
+
+			if (!m_format.plane[0].bit_depth || !m_format.plane[1].bit_depth || !m_format.plane[2].bit_depth)
+				throw error::CannotDecodeImage{ "RGB channels required in BI_BITFIELDS" };
+
+			if (m_bmp_version >= BitmapVersion::INFOV3) {
+				unsigned depth = decode_bitfield(m_bmp_info_header.bV3AlphaMask).first;
+				if (depth) {
+					m_format.plane[3].bit_depth = depth;
+					m_format.plane_count = 4;
+					m_format.color_family = ColorFamily::RGBA;
+				}
+			}
 		}
 
 		if (!m_io->seekable()) {
@@ -491,13 +575,23 @@ class BMPDecoder : public ImageDecoder {
 	void decode_rgb(const OutputBuffer &buffer) try
 	{
 		_im_assert_d(m_bmp_info_header.biWidth >= 0, "bad biWidth");
-		_im_assert_d(m_bmp_info_header.biCompression == BI_RGB, "compression not implemented");
+		_im_assert_d(m_bmp_info_header.biCompression == BI_RGB || m_bmp_info_header.biCompression == BI_BITFIELDS, "compression not implemented");
 
 		size_t rowsize = ceil_n(static_cast<size_t>(m_bmp_info_header.biWidth) * (m_bmp_info_header.biBitCount / 8), sizeof(DWORD));
 		std::vector<uint8_t> row_data(rowsize);
 
 		if (static_cast<size_t>(PTRDIFF_MAX) / rowsize < static_cast<size_t>(m_bmp_info_header.biHeight))
 			throw error::OutOfMemory{};
+
+		std::pair<unsigned, unsigned> bitfield_spec[4] = {};
+		if (m_bmp_info_header.biCompression == BI_BITFIELDS) {
+			bitfield_spec[0] = decode_bitfield(m_bmp_info_header.bV2RedMask);
+			bitfield_spec[1] = decode_bitfield(m_bmp_info_header.bV2GreenMask);
+			bitfield_spec[2] = decode_bitfield(m_bmp_info_header.bV2BlueMask);
+
+			if (m_bmp_version >= BitmapVersion::INFOV3)
+				bitfield_spec[3] = decode_bitfield(m_bmp_info_header.bV3AlphaMask);
+		}
 
 		DWORD height = std::labs(m_bmp_info_header.biHeight);
 		for (DWORD i = 0; i < height; ++i) {
@@ -507,18 +601,28 @@ class BMPDecoder : public ImageDecoder {
 			dst_p[0] = static_cast<uint8_t *>(buffer.data[0]) + dib_row * buffer.stride[0];
 			dst_p[1] = static_cast<uint8_t *>(buffer.data[1]) + dib_row * buffer.stride[1];
 			dst_p[2] = static_cast<uint8_t *>(buffer.data[2]) + dib_row * buffer.stride[2];
+			if (m_bmp_info_header.biCompression == BI_BITFIELDS && bitfield_spec[3].first)
+				dst_p[3] = static_cast<uint8_t *>(buffer.data[3]) + dib_row * buffer.stride[3];
 
 			m_io->read_all(row_data.data(), rowsize);
 
-			// TODO: BI_BITFIELDS
-			if (m_bmp_info_header.biBitCount == 16)
-				p2p::packed_to_planar<packed_rgb555>::unpack(row_data.data(), dst_p, 0, m_bmp_info_header.biWidth);
-			else if (m_bmp_info_header.biBitCount == 24)
-				p2p::packed_to_planar<p2p::packed_rgb24_le>::unpack(row_data.data(), dst_p, 0, m_bmp_info_header.biWidth);
-			else if (m_bmp_info_header.biBitCount == 32)
-				p2p::packed_to_planar<p2p::packed_argb32_le>::unpack(row_data.data(), dst_p, 0, m_bmp_info_header.biWidth);
-			else
-				_im_assert_d(false, "bad biBitCount");
+			if (m_bmp_info_header.biCompression == BI_BITFIELDS) {
+				if (m_bmp_info_header.biBitCount == 16)
+					unpack_bitfield<WORD>(row_data.data(), dst_p, m_bmp_info_header.biWidth, bitfield_spec);
+				else if (m_bmp_info_header.biBitCount == 32)
+					unpack_bitfield<DWORD>(row_data.data(), dst_p, m_bmp_info_header.biWidth, bitfield_spec);
+				else
+					_im_assert_d(false, "bad biBitCount");
+			} else {
+				if (m_bmp_info_header.biBitCount == 16)
+					p2p::packed_to_planar<packed_rgb555>::unpack(row_data.data(), dst_p, 0, m_bmp_info_header.biWidth);
+				else if (m_bmp_info_header.biBitCount == 24)
+					p2p::packed_to_planar<p2p::packed_rgb24_le>::unpack(row_data.data(), dst_p, 0, m_bmp_info_header.biWidth);
+				else if (m_bmp_info_header.biBitCount == 32)
+					p2p::packed_to_planar<p2p::packed_argb32_le>::unpack(row_data.data(), dst_p, 0, m_bmp_info_header.biWidth);
+				else
+					_im_assert_d(false, "bad biBitCount");
+			}
 		}
 	} catch (const std::bad_alloc &) {
 		throw error::OutOfMemory{};
