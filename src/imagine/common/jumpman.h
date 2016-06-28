@@ -63,8 +63,6 @@ public:
 	{
 	}
 
-	[[noreturn]] void handle_exception();
-
 	[[noreturn]] void execute_jump();
 
 	void store_exception();

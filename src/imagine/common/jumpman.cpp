@@ -19,15 +19,6 @@ void Jumpman::rethrow_exception()
 	std::rethrow_exception(ex);
 }
 
-void Jumpman::handle_exception()
-{
-	if (!m_jump_active)
-		std::terminate();
-
-	store_exception();
-	execute_jump();
-}
-
 void Jumpman::execute_jump()
 {
 	if (!m_jump_active)

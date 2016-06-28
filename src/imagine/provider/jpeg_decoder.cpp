@@ -174,7 +174,7 @@ class JPEGDecoder : public ImageDecoder {
 	static void error_exit(j_common_ptr ptr)
 	{
 		JPEGDecoder *d = static_cast<JPEGDecoder *>(ptr->client_data);
-		d->m_jumpman.handle_exception();
+		d->m_jumpman.execute_jump();
 	}
 
 	void decode_header()
