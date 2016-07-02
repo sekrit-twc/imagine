@@ -57,9 +57,6 @@
     <ClCompile Include="..\..\src\imagine\common\decoder.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\imagine\provider\yuv_decoder.cpp">
-      <Filter>Source Files\provider</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\imagine\common\file_io.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
@@ -97,9 +94,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\imagine\common\decoder.h">
       <Filter>Header Files\common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\imagine\provider\yuv_decoder.h">
-      <Filter>Header Files\provider</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\imagine\common\file_io.h">
       <Filter>Header Files\common</Filter>

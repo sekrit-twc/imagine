@@ -154,7 +154,6 @@
     <ClCompile Include="..\..\src\imagine\provider\bmp_decoder.cpp" />
     <ClCompile Include="..\..\src\imagine\provider\jpeg_decoder.cpp" />
     <ClCompile Include="..\..\src\imagine\provider\png_decoder.cpp" />
-    <ClCompile Include="..\..\src\imagine\provider\yuv_decoder.cpp" />
     <ClCompile Include="linktest.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -173,7 +172,6 @@
     <ClInclude Include="..\..\src\imagine\provider\bmp_decoder.h" />
     <ClInclude Include="..\..\src\imagine\provider\jpeg_decoder.h" />
     <ClInclude Include="..\..\src\imagine\provider\png_decoder.h" />
-    <ClInclude Include="..\..\src\imagine\provider\yuv_decoder.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
