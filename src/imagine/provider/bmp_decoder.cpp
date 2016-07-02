@@ -4,7 +4,7 @@
 #include <limits>
 #include <utility>
 #include <vector>
-#include <libp2p/p2p.h>
+#include "libp2p/p2p.h"
 #include "common/align.h"
 #include "common/buffer.h"
 #include "common/decoder.h"

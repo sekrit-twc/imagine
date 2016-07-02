@@ -9,8 +9,8 @@
 #include <string>
 #include <tuple>
 #include <utility>
-#include <vsxx/VapourSynth++.hpp>
-#include <vsxx/vsxx_pluginmain.h>
+#include "vsxx/VapourSynth++.hpp"
+#include "vsxx/vsxx_pluginmain.h"
 #include "common/buffer.h"
 #include "common/decoder.h"
 #include "common/except.h"

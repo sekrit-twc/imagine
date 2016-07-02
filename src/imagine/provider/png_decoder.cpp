@@ -3,8 +3,8 @@
 #include <cstring>
 #include <exception>
 #include <vector>
-#include <libp2p/p2p.h>
 #include <png.h>
+#include "libp2p/p2p.h"
 #include "common/buffer.h"
 #include "common/decoder.h"
 #include "common/except.h"
