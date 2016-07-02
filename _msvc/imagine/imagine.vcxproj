@@ -78,7 +78,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\src\imagine;$(ProjectDir)..\..\extra;$(SolutionDir)..\prefix\$(Configuration)\$(Platform)\include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>OPJ_STATIC;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>OPJ_STATIC;P2P_USER_NAMESPACE=im_p2p;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>
@@ -94,7 +94,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\src\imagine;$(ProjectDir)..\..\extra;$(SolutionDir)..\prefix\$(Configuration)\$(Platform)\include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>OPJ_STATIC;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>OPJ_STATIC;P2P_USER_NAMESPACE=im_p2p;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>
@@ -112,7 +112,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\src\imagine;$(ProjectDir)..\..\extra;$(SolutionDir)..\prefix\$(Configuration)\$(Platform)\include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>OPJ_STATIC;_CRT_SECURE_NO_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>OPJ_STATIC;P2P_USER_NAMESPACE=im_p2p;_CRT_SECURE_NO_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -132,7 +132,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\src\imagine;$(ProjectDir)..\..\extra;$(SolutionDir)..\prefix\$(Configuration)\$(Platform)\include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>OPJ_STATIC;_CRT_SECURE_NO_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>OPJ_STATIC;P2P_USER_NAMESPACE=im_p2p;_CRT_SECURE_NO_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -145,7 +145,6 @@
     <CustomBuildStep />
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\extra\libp2p\p2p.cpp" />
     <ClCompile Include="..\..\extra\libp2p\v210.cpp" />
     <ClCompile Include="..\..\src\imagine\api\imagine.cpp" />
     <ClCompile Include="..\..\src\imagine\common\decoder.cpp" />
@@ -160,7 +159,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\extra\libp2p\p2p.h" />
-    <ClInclude Include="..\..\extra\libp2p\p2p_api.h" />
     <ClInclude Include="..\..\src\imagine\api\imagine.h" />
     <ClInclude Include="..\..\src\imagine\common\align.h" />
     <ClInclude Include="..\..\src\imagine\common\buffer.h" />

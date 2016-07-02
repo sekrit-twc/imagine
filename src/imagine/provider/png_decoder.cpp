@@ -24,8 +24,8 @@ const char PNG_DECODER_NAME[] = "png";
 const char PNG_EXTENSIONS[][4] = { "png" };
 const uint8_t PNG_MAGIC[] = { 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a };
 
-using packed_ay8 = p2p::byte_packed_444_be<uint8_t, uint16_t, p2p::make_mask(p2p::C__, p2p::C__, p2p::C_A, p2p::C_Y)>;
-using packed_ay16 = p2p::byte_packed_444_be<uint16_t, uint32_t, p2p::make_mask(p2p::C__, p2p::C__, p2p::C_A, p2p::C_Y)>;
+using packed_ay8 = im_p2p::byte_packed_444_be<uint8_t, uint16_t, im_p2p::make_mask(im_p2p::C__, im_p2p::C__, im_p2p::C_A, im_p2p::C_Y)>;
+using packed_ay16 = im_p2p::byte_packed_444_be<uint16_t, uint32_t, im_p2p::make_mask(im_p2p::C__, im_p2p::C__, im_p2p::C_A, im_p2p::C_Y)>;
 
 typedef void(*unpack_func)(const void *, void * const *, unsigned, unsigned);
 
@@ -87,11 +87,11 @@ unpack_func select_unpack(const FrameFormat &format)
 	case ColorFamily::GRAY:
 		return nullptr;
 	case ColorFamily::RGB:
-		return high_depth ? p2p::packed_to_planar<p2p::packed_rgb48_be>::unpack : p2p::packed_to_planar<p2p::packed_rgb24_be>::unpack;
+		return high_depth ? im_p2p::packed_to_planar<im_p2p::packed_rgb48_be>::unpack : im_p2p::packed_to_planar<im_p2p::packed_rgb24_be>::unpack;
 	case ColorFamily::GRAYALPHA:
-		return high_depth ? p2p::packed_to_planar<packed_ay16>::unpack : p2p::packed_to_planar<packed_ay8>::unpack;
+		return high_depth ? im_p2p::packed_to_planar<packed_ay16>::unpack : im_p2p::packed_to_planar<packed_ay8>::unpack;
 	case ColorFamily::RGBA:
-		return high_depth ? p2p::packed_to_planar<p2p::packed_argb64_be>::unpack : p2p::packed_to_planar<p2p::packed_argb32_be>::unpack;
+		return high_depth ? im_p2p::packed_to_planar<im_p2p::packed_argb64_be>::unpack : im_p2p::packed_to_planar<im_p2p::packed_argb32_be>::unpack;
 	default:
 		throw error::CannotDecodeImage{ "unsupported color_type" };
 	}

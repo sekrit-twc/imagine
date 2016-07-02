@@ -72,9 +72,6 @@
     <ClCompile Include="..\..\src\imagine\common\jumpman.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\extra\libp2p\p2p.cpp">
-      <Filter>Source Files\extra\libp2p</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\extra\libp2p\v210.cpp">
       <Filter>Source Files\extra\libp2p</Filter>
     </ClCompile>
@@ -126,9 +123,6 @@
       <Filter>Header Files\common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\extra\libp2p\p2p.h">
-      <Filter>Header Files\extra\libp2p</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\extra\libp2p\p2p_api.h">
       <Filter>Header Files\extra\libp2p</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\imagine\provider\bmp_decoder.h">

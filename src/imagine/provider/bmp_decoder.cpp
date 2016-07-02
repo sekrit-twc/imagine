@@ -86,11 +86,11 @@ T lsb_mask(unsigned n)
 }
 
 
-using packed_rgb555 = p2p::pack_traits<
-	uint8_t, uint16_t, p2p::little_endian_t, 1, 0,
-	p2p::make_mask(p2p::C__, p2p::C_R, p2p::C_G, p2p::C_B),
-	p2p::make_mask(0, 10, 5, 0),
-	p2p::make_mask(1, 5, 5, 5)>;
+using packed_rgb555 = im_p2p::pack_traits<
+	uint8_t, uint16_t, im_p2p::little_endian_t, 1, 0,
+	im_p2p::make_mask(im_p2p::C__, im_p2p::C_R, im_p2p::C_G, im_p2p::C_B),
+	im_p2p::make_mask(0, 10, 5, 0),
+	im_p2p::make_mask(1, 5, 5, 5)>;
 
 enum class BitmapVersion {
 	UNKNOWN,
@@ -615,11 +615,11 @@ class BMPDecoder : public ImageDecoder {
 					_im_assert_d(false, "bad biBitCount");
 			} else {
 				if (m_bmp_info_header.biBitCount == 16)
-					p2p::packed_to_planar<packed_rgb555>::unpack(row_data.data(), dst_p, 0, m_bmp_info_header.biWidth);
+					im_p2p::packed_to_planar<packed_rgb555>::unpack(row_data.data(), dst_p, 0, m_bmp_info_header.biWidth);
 				else if (m_bmp_info_header.biBitCount == 24)
-					p2p::packed_to_planar<p2p::packed_rgb24_le>::unpack(row_data.data(), dst_p, 0, m_bmp_info_header.biWidth);
+					im_p2p::packed_to_planar<im_p2p::packed_rgb24_le>::unpack(row_data.data(), dst_p, 0, m_bmp_info_header.biWidth);
 				else if (m_bmp_info_header.biBitCount == 32)
-					p2p::packed_to_planar<p2p::packed_argb32_le>::unpack(row_data.data(), dst_p, 0, m_bmp_info_header.biWidth);
+					im_p2p::packed_to_planar<im_p2p::packed_argb32_le>::unpack(row_data.data(), dst_p, 0, m_bmp_info_header.biWidth);
 				else
 					_im_assert_d(false, "bad biBitCount");
 			}
