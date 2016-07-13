@@ -28,24 +28,6 @@ const size_t JPEG_BUFFER_SIZE = 2048;
 
 const JOCTET eoi_marker[] = { 0xFF, JPEG_EOI };
 
-template <class T, class...Args>
-struct invoke_function {
-	typedef typename std::result_of<T(Args...)>::type result_type;
-	typedef typename std::conditional<std::is_void<result_type>::value, char, result_type>::type stack_type;
-
-	template <class R = result_type, typename std::enable_if<std::is_void<R>::value>::type * = nullptr>
-	static void invoke(stack_type *, T func, Args &&...args)
-	{
-		func(std::forward<Args>(args)...);
-	}
-
-	template <class R = result_type, typename std::enable_if<!std::is_void<R>::value>::type * = nullptr>
-	static void invoke(stack_type *ret, T func, Args &&...args)
-	{
-		*ret = func(std::forward<Args>(args)...);
-	}
-};
-
 void discard_from_io(IOContext *io, IOContext::size_type count)
 {
 	char buf[1024];
