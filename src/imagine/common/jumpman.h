@@ -67,8 +67,8 @@ public:
 
 	void store_exception();
 
-    template <class T, class ...Args>
-    typename std::result_of<T(Args...)>::type call(T func, Args &&...args)
+	template <class T, class ...Args>
+	typename std::result_of<T(Args...)>::type call(T func, Args &&...args)
 	{
 		if (setjmp(m_setjmp)) {
 			m_jump_active = false;
