@@ -15,6 +15,7 @@
 #include "common/format.h"
 #include "common/io_context.h"
 #include "common/jumpman.h"
+#include "common/path.h"
 #include "provider/jpeg_decoder.h"
 
 #ifdef IMAGINE_JPEG_ENABLED
@@ -23,9 +24,9 @@ namespace imagine {
 namespace {
 
 const char JPEG_DECODER_NAME[] = "jpeg";
-const char JPEG_EXTENSIONS[][8] = { "jpg", "jpeg", "jpe", "jif", "jfif", "jfi" };
-const size_t JPEG_BUFFER_SIZE = 2048;
+const std::array<const char *, 8> jpeg_extensions{ { "jpg", "jpeg", "jpe", "jif", "jfif", "jfi" } };
 
+const size_t JPEG_BUFFER_SIZE = 2048;
 const JOCTET eoi_marker[] = { 0xFF, JPEG_EOI };
 
 void discard_from_io(IOContext *io, IOContext::size_type count)
@@ -37,19 +38,6 @@ void discard_from_io(IOContext *io, IOContext::size_type count)
 		io->read_all(buf, n);
 		count -= n;
 	}
-}
-
-bool is_jpeg_extension(const char *path)
-{
-	const char *ptr = strrchr(path, '.');
-	if (!ptr)
-		return false;
-
-	for (const char *ext : JPEG_EXTENSIONS) {
-		if (!strcmp(ptr, ext))
-			return true;
-	}
-	return false;
 }
 
 bool recognize_jpeg(IOContext *io)
@@ -308,7 +296,7 @@ std::unique_ptr<ImageDecoder> JPEGDecoderFactory::create_decoder(const char *pat
 	else if (io->seekable())
 		recognized = recognize_jpeg(io.get());
 	else
-		recognized = is_jpeg_extension(path);
+		recognized = is_matching_extension(path, jpeg_extensions.data(), jpeg_extensions.size());
 
 	return recognized ? std::unique_ptr<ImageDecoder>{ new JPEGDecoder{ std::move(io) } } : nullptr;
 } catch (const std::bad_alloc &) {

@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <cstdlib>
 #include <limits>
@@ -12,6 +13,7 @@
 #include "common/format.h"
 #include "common/io_context.h"
 #include "common/im_assert.h"
+#include "common/path.h"
 #include "bmp_decoder.h"
 
 #ifdef _MSC_VER
@@ -35,7 +37,7 @@ namespace imagine {
 namespace {
 
 const char BMP_DECODER_NAME[] = "bmp";
-const char BMP_EXTENSIONS[][4] = { "bmp", "dib" };
+const std::array<const char *, 2> bmp_extensions{ { "bmp", "dib" } };
 
 const size_t BITMAPCOREHEADER_SIZE = 12;
 const size_t OS22XBITMAPHEADER_SIZE = 64;
@@ -263,19 +265,6 @@ void discard_from_io(IOContext *io, IOContext::size_type count)
 		io->read_all(buf, n);
 		count -= n;
 	}
-}
-
-bool is_bmp_extension(const char *path)
-{
-	const char *ptr = strrchr(path, '.');
-	if (!ptr)
-		return false;
-
-	for (const char *ext : BMP_EXTENSIONS) {
-		if (!strcmp(ptr, ext))
-			return true;
-	}
-	return false;
 }
 
 bool recognize_bmp(IOContext *io)
@@ -703,7 +692,7 @@ std::unique_ptr<ImageDecoder> BMPDecoderFactory::create_decoder(const char *path
 	else if (io->seekable())
 		recognized = recognize_bmp(io.get());
 	else
-		recognized = is_bmp_extension(path);
+		recognized = is_matching_extension(path, bmp_extensions.data(), bmp_extensions.size());
 
 	return recognized ? std::unique_ptr<ImageDecoder>{ new BMPDecoder{ std::move(io) } } : nullptr;
 } catch (const std::bad_alloc &) {

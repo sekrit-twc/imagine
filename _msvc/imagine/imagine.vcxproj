@@ -151,6 +151,7 @@
     <ClCompile Include="..\..\src\imagine\common\file_io.cpp" />
     <ClCompile Include="..\..\src\imagine\common\io_context.cpp" />
     <ClCompile Include="..\..\src\imagine\common\jumpman.cpp" />
+    <ClCompile Include="..\..\src\imagine\common\path.cpp" />
     <ClCompile Include="..\..\src\imagine\provider\bmp_decoder.cpp" />
     <ClCompile Include="..\..\src\imagine\provider\jpeg_decoder.cpp" />
     <ClCompile Include="..\..\src\imagine\provider\png_decoder.cpp" />
@@ -169,6 +170,7 @@
     <ClInclude Include="..\..\src\imagine\common\im_assert.h" />
     <ClInclude Include="..\..\src\imagine\common\io_context.h" />
     <ClInclude Include="..\..\src\imagine\common\jumpman.h" />
+    <ClInclude Include="..\..\src\imagine\common\path.h" />
     <ClInclude Include="..\..\src\imagine\provider\bmp_decoder.h" />
     <ClInclude Include="..\..\src\imagine\provider\jpeg_decoder.h" />
     <ClInclude Include="..\..\src\imagine\provider\png_decoder.h" />

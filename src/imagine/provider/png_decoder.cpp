@@ -1,3 +1,4 @@
+#include <array>
 #include <csetjmp>
 #include <cstdio>
 #include <cstring>
@@ -12,6 +13,7 @@
 #include "common/im_assert.h"
 #include "common/io_context.h"
 #include "common/jumpman.h"
+#include "common/path.h"
 #include "png_decoder.h"
 
 #define IMAGINE_PNG_ENABLED
@@ -21,30 +23,18 @@ namespace imagine {
 namespace {
 
 const char PNG_DECODER_NAME[] = "png";
-const char PNG_EXTENSIONS[][4] = { "png" };
-const uint8_t PNG_MAGIC[] = { 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a };
+const std::array<const char *, 1> png_extensions{ { "png" } };
+
+const size_t PNG_MAGIC_LEN = 8;
 
 using packed_ay8 = im_p2p::byte_packed_444_be<uint8_t, uint16_t, im_p2p::make_mask(im_p2p::C__, im_p2p::C__, im_p2p::C_A, im_p2p::C_Y)>;
 using packed_ay16 = im_p2p::byte_packed_444_be<uint16_t, uint32_t, im_p2p::make_mask(im_p2p::C__, im_p2p::C__, im_p2p::C_A, im_p2p::C_Y)>;
 
 typedef void(*unpack_func)(const void *, void * const *, unsigned, unsigned);
 
-bool is_png_extension(const char *path)
-{
-	const char *ptr = strrchr(path, '.');
-	if (!ptr)
-		return false;
-
-	for (const char *ext : PNG_EXTENSIONS) {
-		if (!strcmp(ptr, ext))
-			return true;
-	}
-	return false;
-}
-
 bool recognize_png(IOContext *io)
 {
-	uint8_t vec[sizeof(PNG_MAGIC)];
+	uint8_t vec[PNG_MAGIC_LEN];
 	IOContext::difference_type pos = io->tell();
 	bool ret = false;
 
@@ -324,7 +314,7 @@ std::unique_ptr<ImageDecoder> PNGDecoderFactory::create_decoder(const char *path
 	else if (io->seekable())
 		recognized = recognize_png(io.get());
 	else
-		recognized = is_png_extension(path);
+		recognized = is_matching_extension(path, png_extensions.data(), png_extensions.size());
 
 	return recognized ? std::unique_ptr<ImageDecoder>{ new PNGDecoder{ std::move(io) } } : nullptr;
 }
