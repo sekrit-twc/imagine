@@ -52,7 +52,7 @@ std::unique_ptr<ImageDecoder> ImageDecoderRegistry::create_decoder(const char *p
 		if (provider)
 			return provider;
 
-		_im_assert_d(io, "factory must not move IOContext");
+		im_assert_d(io, "factory must not move IOContext");
 		if (io->seekable())
 			io->seek_set(pos);
 	}

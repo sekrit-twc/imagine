@@ -527,9 +527,9 @@ class BMPDecoder : public ImageDecoder {
 
 	void decode_pal(const OutputBuffer &buffer) try
 	{
-		_im_assert_d(m_bmp_info_header.biWidth >= 0, "bad biWidth");
-		_im_assert_d(m_bmp_info_header.biHeight >= 0, "bad biHeight");
-		_im_assert_d(m_bmp_info_header.biCompression == BI_RGB, "compression not implemented");
+		im_assert_d(m_bmp_info_header.biWidth >= 0, "bad biWidth");
+		im_assert_d(m_bmp_info_header.biHeight >= 0, "bad biHeight");
+		im_assert_d(m_bmp_info_header.biCompression == BI_RGB, "compression not implemented");
 
 		size_t rowsize = ceil_n((static_cast<size_t>(m_bmp_info_header.biWidth) * m_bmp_info_header.biBitCount + 7) / 8, sizeof(DWORD));
 		std::vector<uint8_t> row_data(rowsize);
@@ -555,7 +555,7 @@ class BMPDecoder : public ImageDecoder {
 			else if (m_bmp_info_header.biBitCount == 8)
 				depalettize<8>(dst_p, row_data.data(), m_bmp_info_header.biWidth, m_palette);
 			else
-				_im_assert_d(false, "bad biBitCount");
+				im_assert_d(false, "bad biBitCount");
 		}
 	} catch (const std::bad_alloc &) {
 		throw error::OutOfMemory{};
@@ -563,8 +563,8 @@ class BMPDecoder : public ImageDecoder {
 
 	void decode_rgb(const OutputBuffer &buffer) try
 	{
-		_im_assert_d(m_bmp_info_header.biWidth >= 0, "bad biWidth");
-		_im_assert_d(m_bmp_info_header.biCompression == BI_RGB || m_bmp_info_header.biCompression == BI_BITFIELDS, "compression not implemented");
+		im_assert_d(m_bmp_info_header.biWidth >= 0, "bad biWidth");
+		im_assert_d(m_bmp_info_header.biCompression == BI_RGB || m_bmp_info_header.biCompression == BI_BITFIELDS, "compression not implemented");
 
 		size_t rowsize = ceil_n(static_cast<size_t>(m_bmp_info_header.biWidth) * (m_bmp_info_header.biBitCount / 8), sizeof(DWORD));
 		std::vector<uint8_t> row_data(rowsize);
@@ -601,7 +601,7 @@ class BMPDecoder : public ImageDecoder {
 				else if (m_bmp_info_header.biBitCount == 32)
 					unpack_bitfield<DWORD>(row_data.data(), dst_p, m_bmp_info_header.biWidth, bitfield_spec);
 				else
-					_im_assert_d(false, "bad biBitCount");
+					im_assert_d(false, "bad biBitCount");
 			} else {
 				if (m_bmp_info_header.biBitCount == 16)
 					im_p2p::packed_to_planar<packed_rgb555>::unpack(row_data.data(), dst_p, 0, m_bmp_info_header.biWidth);
@@ -610,7 +610,7 @@ class BMPDecoder : public ImageDecoder {
 				else if (m_bmp_info_header.biBitCount == 32)
 					im_p2p::packed_to_planar<im_p2p::packed_argb32_le>::unpack(row_data.data(), dst_p, 0, m_bmp_info_header.biWidth);
 				else
-					_im_assert_d(false, "bad biBitCount");
+					im_assert_d(false, "bad biBitCount");
 			}
 		}
 	} catch (const std::bad_alloc &) {

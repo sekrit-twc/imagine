@@ -1,5 +1,5 @@
-#undef _im_assert
-#undef _im_assert_d
+#undef im_assert
+#undef im_assert_d
 
 #ifdef NDEBUG
   #define IM_NDEBUG
@@ -8,13 +8,13 @@
 
 #include <assert.h>
 
-#define _im_assert(x, msg) assert((x) && (msg))
+#define im_assert(x, msg) assert((x) && (msg))
 
 #ifdef IM_NDEBUG
   #include "ccdep.h"
-  #define _im_assert_d(x, msg) ASSUME_CONDITION(x)
+  #define im_assert_d(x, msg) ASSUME_CONDITION(x)
   #undef IM_NDEBUG
   #define NDEBUG
 #else
-  #define _im_assert_d(x, msg) _im_assert(x, msg)
+  #define im_assert_d(x, msg) im_assert(x, msg)
 #endif

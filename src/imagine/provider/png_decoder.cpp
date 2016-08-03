@@ -48,20 +48,20 @@ bool recognize_png(IOContext *io)
 
 ColorFamily translate_png_color(png_byte color_type, unsigned plane_count)
 {
-	_im_assert_d(!(color_type & PNG_COLOR_MASK_PALETTE), "palette must be removed");
+	im_assert_d(!(color_type & PNG_COLOR_MASK_PALETTE), "palette must be removed");
 
 	switch (color_type) {
 	case PNG_COLOR_TYPE_GRAY:
-		_im_assert_d(plane_count == 1, "");
+		im_assert_d(plane_count == 1, "");
 		return ColorFamily::GRAY;
 	case PNG_COLOR_TYPE_RGB:
-		_im_assert_d(plane_count == 3, "");
+		im_assert_d(plane_count == 3, "");
 		return ColorFamily::RGB;
 	case PNG_COLOR_TYPE_RGB_ALPHA:
-		_im_assert_d(plane_count == 4, "");
+		im_assert_d(plane_count == 4, "");
 		return ColorFamily::RGBA;
 	case PNG_COLOR_TYPE_GRAY_ALPHA:
-		_im_assert_d(plane_count == 2, "");
+		im_assert_d(plane_count == 2, "");
 		return ColorFamily::GRAYALPHA;
 	default:
 		throw error::CannotDecodeImage{ "unknown color_type" };
