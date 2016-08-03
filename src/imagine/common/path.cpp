@@ -3,7 +3,6 @@
 #include "path.h"
 
 namespace imagine {
-
 namespace {
 
 bool eq_case_insensitive(const char *a, const char *b, const std::locale &loc)
@@ -18,6 +17,7 @@ bool eq_case_insensitive(const char *a, const char *b, const std::locale &loc)
 }
 
 } // namespace
+
 
 bool is_matching_extension(const char *path, const char * const *extensions, size_t num_extensions)
 {

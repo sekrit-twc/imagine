@@ -49,7 +49,7 @@ protected:
 	void check_seekable();
 	difference_type update_file_pointer();
 public:
-	explicit FileIOContext(FileIOHandle file, const std::string &path);
+	FileIOContext(FileIOHandle file, const std::string &path);
 
 	explicit FileIOContext(const std::string &path, read_tag_type = read_tag);
 	FileIOContext(const std::string &path, write_tag_type);

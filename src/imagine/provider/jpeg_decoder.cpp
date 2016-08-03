@@ -48,10 +48,9 @@ bool recognize_jpeg(IOContext *io)
 
 	io->read_all(vec, sizeof(vec));
 	// SOI followed by additional segment.
-	if (vec[0] = 0xFF && vec[1] == 0xD8 && vec[2] == 0xFF)
-		ret = true;
-
+	ret = vec[0] = 0xFF && vec[1] == 0xD8 && vec[2] == 0xFF;
 	io->seek_set(pos);
+
 	return ret;
 }
 

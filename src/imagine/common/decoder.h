@@ -52,7 +52,7 @@ public:
 };
 
 class ImageDecoderRegistry {
-	std::multimap<int, std::unique_ptr<ImageDecoderFactory>> m_registry_;
+	std::multimap<int, std::unique_ptr<ImageDecoderFactory>> m_registry;
 public:
 	void register_default_providers();
 

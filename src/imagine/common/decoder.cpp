@@ -29,16 +29,16 @@ void ImageDecoderRegistry::register_default_providers() try
 
 void ImageDecoderRegistry::register_provider(std::unique_ptr<ImageDecoderFactory> factory) try
 {
-	m_registry_.insert(std::make_pair(factory->priority(), std::move(factory)));
+	m_registry.insert(std::make_pair(factory->priority(), std::move(factory)));
 } catch (const std::bad_alloc &) {
 	throw error::OutOfMemory{};
 }
 
 void ImageDecoderRegistry::disable_provider(const char *name)
 {
-	for (auto it = m_registry_.begin(); it != m_registry_.end();) {
+	for (auto it = m_registry.begin(); it != m_registry.end();) {
 		if (!strcmp(it->second->name(), name))
-			it = m_registry_.erase(it);
+			it = m_registry.erase(it);
 		else
 			++it;
 	}
@@ -47,7 +47,7 @@ void ImageDecoderRegistry::disable_provider(const char *name)
 std::unique_ptr<ImageDecoder> ImageDecoderRegistry::create_decoder(const char *path, const FileFormat *format, std::unique_ptr<IOContext> io)
 {
 	IOContext::difference_type pos = io->tell();
-	for (const auto &factory : m_registry_) {
+	for (const auto &factory : m_registry) {
 		std::unique_ptr<ImageDecoder> provider = factory.second->create_decoder(path, format, std::move(io));
 		if (provider)
 			return provider;
