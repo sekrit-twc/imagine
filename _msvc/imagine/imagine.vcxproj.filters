@@ -78,6 +78,9 @@
     <ClCompile Include="..\..\src\imagine\common\path.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\imagine\provider\tiff_decoder.cpp">
+      <Filter>Source Files\provider</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\imagine\api\imagine.h">
@@ -127,6 +130,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\imagine\common\path.h">
       <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\imagine\provider\tiff_decoder.h">
+      <Filter>Header Files\provider</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

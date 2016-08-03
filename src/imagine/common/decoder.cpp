@@ -3,6 +3,7 @@
 #include "provider/bmp_decoder.h"
 #include "provider/jpeg_decoder.h"
 #include "provider/png_decoder.h"
+#include "provider/tiff_decoder.h"
 #include "decoder.h"
 #include "except.h"
 #include "io_context.h"
@@ -21,6 +22,9 @@ void ImageDecoderRegistry::register_default_providers() try
 #endif
 #ifdef IMAGINE_PNG_ENABLED
 	register_provider(std::unique_ptr<ImageDecoderFactory>{ new PNGDecoderFactory{} });
+#endif
+#ifdef IMAGINE_TIFF_ENABLED
+	register_provider(std::unique_ptr<ImageDecoderFactory>{ new TIFFDecoderFactory{} });
 #endif
 	register_provider(std::unique_ptr<ImageDecoderFactory>{ new BMPDecoderFactory{} });
 } catch (const std::bad_alloc &) {

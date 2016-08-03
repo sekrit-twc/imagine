@@ -78,7 +78,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\src\imagine;$(ProjectDir)..\..\extra;$(SolutionDir)..\prefix\$(Configuration)\$(Platform)\include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>OPJ_STATIC;P2P_USER_NAMESPACE=im_p2p;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>OPJ_STATIC;P2P_USER_NAMESPACE=im_p2p;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>
@@ -94,7 +94,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\src\imagine;$(ProjectDir)..\..\extra;$(SolutionDir)..\prefix\$(Configuration)\$(Platform)\include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>OPJ_STATIC;P2P_USER_NAMESPACE=im_p2p;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>OPJ_STATIC;P2P_USER_NAMESPACE=im_p2p;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>
@@ -112,7 +112,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\src\imagine;$(ProjectDir)..\..\extra;$(SolutionDir)..\prefix\$(Configuration)\$(Platform)\include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>OPJ_STATIC;P2P_USER_NAMESPACE=im_p2p;_CRT_SECURE_NO_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>OPJ_STATIC;P2P_USER_NAMESPACE=im_p2p;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -132,7 +132,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\src\imagine;$(ProjectDir)..\..\extra;$(SolutionDir)..\prefix\$(Configuration)\$(Platform)\include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>OPJ_STATIC;P2P_USER_NAMESPACE=im_p2p;_CRT_SECURE_NO_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>OPJ_STATIC;P2P_USER_NAMESPACE=im_p2p;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -155,6 +155,7 @@
     <ClCompile Include="..\..\src\imagine\provider\bmp_decoder.cpp" />
     <ClCompile Include="..\..\src\imagine\provider\jpeg_decoder.cpp" />
     <ClCompile Include="..\..\src\imagine\provider\png_decoder.cpp" />
+    <ClCompile Include="..\..\src\imagine\provider\tiff_decoder.cpp" />
     <ClCompile Include="linktest.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -174,6 +175,7 @@
     <ClInclude Include="..\..\src\imagine\provider\bmp_decoder.h" />
     <ClInclude Include="..\..\src\imagine\provider\jpeg_decoder.h" />
     <ClInclude Include="..\..\src\imagine\provider\png_decoder.h" />
+    <ClInclude Include="..\..\src\imagine\provider\tiff_decoder.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
