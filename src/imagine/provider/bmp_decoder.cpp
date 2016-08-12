@@ -478,7 +478,7 @@ class BMPDecoder : public ImageDecoder {
 		m_format.plane_count = 3;
 		for (unsigned p = 0; p < m_format.plane_count; ++p) {
 			m_format.plane[p].width = m_bmp_info_header.biWidth;
-			m_format.plane[p].height = m_bmp_info_header.biHeight;
+			m_format.plane[p].height = std::abs(m_bmp_info_header.biHeight);
 			m_format.plane[p].bit_depth = depth;
 		}
 
