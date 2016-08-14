@@ -20,21 +20,21 @@ enum class ImageType {
 
 enum class ColorFamily {
 	UNKNOWN,
-	// Y = 0
+	// Y = 0.
 	GRAY,
-	// Y = 0, U = 1, V = 2
+	// Y = 0, U = 1, V = 2.
 	YUV,
-	// R = 0, G = 1, B = 2
+	// R = 0, G = 1, B = 2.
 	RGB,
-	// Y = 0, A = 1
+	// Y = 0, A = 1.
 	GRAYALPHA,
-	// Y = 0, U = 1, V = 2, A = 3
+	// Y = 0, U = 1, V = 2, A = 3.
 	YUVA,
-	// Y = 0, U = 1, V = 2, A = 3
+	// Y = 0, U = 1, V = 2, A = 3.
 	RGBA,
-	// Y = 0, Cb = 1, Cr = 2, K = 3
+	// Y = 0, Cb = 1, Cr = 2, K = 3.
 	YCCK,
-	// C = 0, M = 1, Y = 2, K = 3
+	// C = 0, M = 1, Y = 2, K = 3.
 	CMYK,
 };
 
