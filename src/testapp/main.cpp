@@ -226,10 +226,10 @@ int main(int argc, char **argv)
 		ret = 0;
 	} catch (const imagine::error::Exception &) {
 		print_imagine_error();
-		return 1;
+		ret = 1;
 	} catch (const std::exception &e) {
 		std::cerr << "error: " << e.what() << '\n';
-		return 1;
+		ret = 1;
 	}
 
 	return ret;
