@@ -197,13 +197,19 @@ int main(int argc, char **argv)
 		if (!decoder)
 			throw std::runtime_error{ "no decoder for file" };
 
+		imagine::FileFormat file_format = decoder->file_format();
+
 		std::cout << "image decoder: " << decoder->name() << '\n';
-		std::cout << decoder->file_format() << '\n';
+		std::cout << file_format << '\n';
 
 		unsigned decoded_count = 0;
 		for (imagine::FrameFormat format = decoder->next_frame_format();
 		     imagine::is_constant_format(format);
-			 format = decoder->next_frame_format()) {
+			 format = decoder->next_frame_format())
+		{
+			if (!imagine::is_constant_format(file_format))
+				std::cout << "frame " << decoded_count << ": " << format << '\n';
+
 			ManagedOutputBuffer buffer{ format };
 
 			try {
