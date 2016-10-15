@@ -15,7 +15,6 @@ enum class ImageType {
 	JPEG2000,
 	PNG,
 	TIFF,
-	YUV_TEST,
 };
 
 enum class ColorFamily {

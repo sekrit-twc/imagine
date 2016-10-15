@@ -96,8 +96,6 @@ std::ostream &operator<<(std::ostream &os, imagine::ImageType type)
 		return os << "png";
 	case imagine::ImageType::TIFF:
 		return os << "tiff";
-	case imagine::ImageType::YUV_TEST:
-		return os << "yuv_test";
 	default:
 		return os;
 	}
