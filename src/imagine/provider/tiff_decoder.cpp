@@ -468,7 +468,7 @@ class TIFFDecoder : public ImageDecoder {
 		}
 	}
 public:
-	explicit TIFFDecoder(std::unique_ptr<IOContext> &&io) :
+	explicit TIFFDecoder(std::unique_ptr<IOContext> io) :
 		m_tiff{},
 		m_io{ std::move(io) },
 		m_file_format{ ImageType::TIFF },
