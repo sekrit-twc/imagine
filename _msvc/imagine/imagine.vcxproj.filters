@@ -134,5 +134,8 @@
     <ClInclude Include="..\..\src\imagine\provider\tiff_decoder.h">
       <Filter>Header Files\provider</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\imagine\api\imagine++.hpp">
+      <Filter>Header Files\api</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

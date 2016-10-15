@@ -48,7 +48,7 @@ void ImageDecoderRegistry::disable_provider(const char *name)
 	}
 }
 
-std::unique_ptr<ImageDecoder> ImageDecoderRegistry::create_decoder(const char *path, const FileFormat *format, std::unique_ptr<IOContext> io)
+std::unique_ptr<ImageDecoder> ImageDecoderRegistry::create_decoder(const char *path, const FileFormat *format, std::unique_ptr<IOContext> io) const
 {
 	IOContext::difference_type pos = io->tell();
 	for (const auto &factory : m_registry) {

@@ -3,9 +3,13 @@
 #ifndef IMAGINE_IO_CONTEXT_H_
 #define IMAGINE_IO_CONTEXT_H_
 
+struct imagine_io_context {
+	virtual ~imagine_io_context() = default;
+};
+
 namespace imagine {
 
-class IOContext {
+class IOContext : public imagine_io_context {
 public:
 	typedef unsigned long long size_type;
 	typedef long long difference_type;

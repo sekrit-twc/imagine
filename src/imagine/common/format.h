@@ -3,11 +3,17 @@
 #ifndef IMAGINE_FORMAT_H_
 #define IMAGINE_FORMAT_H_
 
+struct imagine_file_format {
+protected:
+	~imagine_file_format() = default;
+};
+
 namespace imagine {
 
 const unsigned MAX_PLANE_COUNT = 4;
 
 enum class ImageType {
+	UNKNOWN,
 	BMP,
 	DPX,
 	EXR,
@@ -66,9 +72,13 @@ struct FrameFormat {
 	}
 };
 
-struct FileFormat : public FrameFormat {
+struct FileFormat : public FrameFormat, public imagine_file_format {
 	ImageType type;
 	unsigned frame_count;
+
+	FileFormat() : FrameFormat{}, type{}, frame_count{}
+	{
+	}
 
 	explicit FileFormat(ImageType type, unsigned frame_count = 0) :
 		type{ type },

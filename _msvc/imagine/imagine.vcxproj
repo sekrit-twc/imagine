@@ -160,6 +160,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\extra\libp2p\p2p.h" />
+    <ClInclude Include="..\..\src\imagine\api\imagine++.hpp" />
     <ClInclude Include="..\..\src\imagine\api\imagine.h" />
     <ClInclude Include="..\..\src\imagine\common\align.h" />
     <ClInclude Include="..\..\src\imagine\common\buffer.h" />

@@ -9,13 +9,9 @@
 #include <string>
 #include <tuple>
 #include <utility>
+#include <imagine++.hpp>
 #include "vsxx/VapourSynth++.hpp"
 #include "vsxx/vsxx_pluginmain.h"
-#include "common/buffer.h"
-#include "common/decoder.h"
-#include "common/except.h"
-#include "common/file_io.h"
-#include "common/format.h"
 #include "path.h"
 
 using namespace vsxx;
@@ -103,78 +99,80 @@ int get_sequence_length(const FormatString &fmt, int initial)
 	return count;
 }
 
-[[noreturn]] void translate_ioerror()
+[[noreturn]] void translate_imerror(const imaginexx::im_error &e)
 {
 	try {
-		throw;
-	} catch (const imagine::error::IOError &e) {
-		std::exception_ptr io_ex = std::current_exception();
+		std::ostringstream ss;
 
-		try {
-			std::ostringstream ss;
-
-			ss << e.what() << " path=" << e.path() << " off=" << e.off() << " count=" << e.count() << " code=" << e.error_code();
-			throw std::runtime_error{ ss.str() };
-		} catch (const std::bad_alloc &) {
-			throw std::runtime_error{ "ioerror" };
+		if (e.error_category() == IMAGINE_ERROR_IO) {
+			ss << "error " << e.code << ": path=" << e.io_details.path << " off=" << e.io_details.off
+			   << "count=" << e.io_details.count << "errno=" << e.io_details.errno_
+			   << " " << e.msg;
+		} else {
+			ss << "error " << e.code << ": " << e.msg;
 		}
+		throw std::runtime_error{ ss.str() };
+	} catch (...) {
+		throw std::runtime_error{ e.msg };
 	}
 }
 
-VSColorFamily match_color_family(const imagine::FrameFormat &format)
+VSColorFamily match_color_family(const imaginexx::FileFormat &format)
 {
-	switch (format.color_family) {
-	case imagine::ColorFamily::GRAY:
-	case imagine::ColorFamily::GRAYALPHA:
+	switch (format.color_family()) {
+	case IMAGINE_COLOR_FAMILY_GRAY:
+	case IMAGINE_COLOR_FAMILY_GRAYALPHA:
 		return cmGray;
-	case imagine::ColorFamily::RGB:
-	case imagine::ColorFamily::RGBA:
+	case IMAGINE_COLOR_FAMILY_RGB:
+	case IMAGINE_COLOR_FAMILY_RGBA:
 		return cmRGB;
-	case imagine::ColorFamily::YUV:
-	case imagine::ColorFamily::YUVA:
+	case IMAGINE_COLOR_FAMILY_YUV:
+	case IMAGINE_COLOR_FAMILY_YUVA:
 		return cmYUV;
 	default:
-		if (format.plane_count == 1)
+		if (format.plane_count() == 1)
 			return cmGray;
-		else if (format.plane_count == 3)
+		else if (format.plane_count() == 3)
 			return cmYUV;
 		else
 			throw std::runtime_error{ "unable to map color family" };
 	}
 }
 
-bool has_alpha(const imagine::ColorFamily family)
+bool has_alpha(imagine_color_family_e color_family)
 {
-	return family == imagine::ColorFamily::GRAYALPHA || family == imagine::ColorFamily::RGBA || family == imagine::ColorFamily::YUVA;
+	return color_family == IMAGINE_COLOR_FAMILY_GRAYALPHA ||
+		color_family == IMAGINE_COLOR_FAMILY_RGBA ||
+		color_family == IMAGINE_COLOR_FAMILY_YUVA;
 }
 
-std::tuple<int, int, const VSFormat *> adjust_imformat(const imagine::FrameFormat &imformat, const VapourCore &core)
+std::tuple<int, int, const VSFormat *> adjust_imformat(const imaginexx::FileFormat &imformat, const VapourCore &core)
 {
-	unsigned w = imformat.plane[0].width;
-	unsigned h = imformat.plane[0].height;
-	unsigned depth = imformat.plane[0].bit_depth;
-	VSSampleType st = imformat.plane[0].floating_point ? stFloat : stInteger;
+	unsigned w = imformat.width(0);
+	unsigned h = imformat.height(0);
+	unsigned depth = imformat.bit_depth(0);
+	VSSampleType st = imformat.is_floating_point(0) ? stFloat : stInteger;
+	unsigned plane_count = imformat.plane_count();
 	unsigned subsample_w = 0;
 	unsigned subsample_h = 0;
 
 	if (depth < 8 || depth > 32 || (st == stFloat && depth != 16 && depth != 32))
 		throw std::runtime_error{ "unsupported bit depth" };
 
-	if (imformat.plane_count >= 3 &&
-		((imformat.plane[1].width != imformat.plane[2].width) ||
-		 (imformat.plane[1].height != imformat.plane[2].height)))
+	if (plane_count >= 3 &&
+		((imformat.width(1) != imformat.width(2)) || (imformat.height(1) != imformat.height(2))))
 		throw std::runtime_error{ "different U and V dimensions not supported" };
-	if (!has_alpha(imformat.color_family) && imformat.plane_count >= 4)
+	if (!has_alpha(imformat.color_family()) && imformat.plane_count() >= 4)
 		throw std::runtime_error{ "4-plane formats not supported" };
 
 	VSColorFamily cf = match_color_family(imformat);
 	if (cf == cmGray)
 		return{ w, h, core.register_format(cf, st, depth, 0, 0) };
 
-	for (unsigned p = 1; p < imformat.plane_count; ++p) {
-		if (imformat.plane[p].width > w || imformat.plane[p].height > h)
+	for (unsigned p = 1; p < plane_count; ++p) {
+		if (imformat.width(p) > w || imformat.height(p) > h)
 			throw std::runtime_error{ "luma subsampling not allowed" };
-		if (imformat.plane[p].bit_depth != depth || imformat.plane[p].floating_point && st != stFloat)
+		if (imformat.bit_depth(p) != depth || imformat.is_floating_point(p) && st != stFloat)
 			throw std::runtime_error{ "per-plane bit depth not supported" };
 	}
 
@@ -186,17 +184,17 @@ std::tuple<int, int, const VSFormat *> adjust_imformat(const imagine::FrameForma
 		unsigned h_ceil = h % ss_mod ? (h + ss_mod - h % ss_mod) : h;
 
 		// Fix bad YUV images with wrong luma modulo.
-		if (imformat.plane[1].width << ss == w_floor || imformat.plane[1].width << ss == w_ceil) {
+		if (imformat.width(1) << ss == w_floor || imformat.width(1) << ss == w_ceil) {
 			w = w_ceil;
 			subsample_w = ss;
 		}
-		if (imformat.plane[1].height << ss == h_floor || imformat.plane[1].height << ss == h_ceil) {
+		if (imformat.height(1) << ss == h_floor || imformat.height(1) << ss == h_ceil) {
 			h = h_ceil;
 			subsample_h = ss;
 		}
 	}
-	if ((w != imformat.plane[1].width << subsample_w && w != (imformat.plane[1].width + 1) << subsample_w) ||
-	    (h != imformat.plane[1].height << subsample_h && h != (imformat.plane[1].height + 1) << subsample_h))
+	if ((w != imformat.width(1) << subsample_w && w != (imformat.width(1) + 1) << subsample_w) ||
+	    (h != imformat.height(1) << subsample_h && h != (imformat.height(1) + 1) << subsample_h))
 		throw std::runtime_error{ "unsupported subsampling" };
 
 	if (cf == cmRGB && (subsample_w || subsample_h))
@@ -204,7 +202,7 @@ std::tuple<int, int, const VSFormat *> adjust_imformat(const imagine::FrameForma
 	return{ w, h, core.register_format(cf, st, depth, subsample_w, subsample_h) };
 }
 
-void fix_bad_yuv_dimensions(const VideoFrame &vsframe, const imagine::FrameFormat &imformat)
+void fix_bad_yuv_dimensions(const VideoFrame &vsframe, const imaginexx::FileFormat &imformat)
 {
 	const VSFormat &vsformat = vsframe.format();
 
@@ -212,21 +210,21 @@ void fix_bad_yuv_dimensions(const VideoFrame &vsframe, const imagine::FrameForma
 		unsigned w = vsframe.width(p);
 		unsigned h = vsframe.height(p);
 
-		if (w != imformat.plane[p].width || h != imformat.plane[p].height) {
+		if (w != imformat.width(p) || h != imformat.height(p)) {
 			// Duplicate the last row.
 			uint8_t *base_ptr = static_cast<uint8_t *>(vsframe.write_ptr(p));
 			ptrdiff_t stride = vsframe.stride(p);
 
-			const uint8_t *last_row = base_ptr + static_cast<ptrdiff_t>(imformat.plane[p].height - 1) * stride;
-			for (unsigned i = imformat.plane[p].height; i < h; ++i) {
+			const uint8_t *last_row = base_ptr + static_cast<ptrdiff_t>(imformat.height(p) - 1) * stride;
+			for (unsigned i = imformat.height(p); i < h; ++i) {
 				memcpy(base_ptr + static_cast<ptrdiff_t>(i) * stride, last_row, w * vsformat.bytesPerSample);
 			}
 			// Duplicate the last column.
 			for (unsigned i = 0; i < h; ++i) {
 				uint8_t *row = base_ptr + static_cast<ptrdiff_t>(i) * stride;
-				const uint8_t *sample = row + (imformat.plane[p].width - 1) * vsformat.bytesPerSample;
+				const uint8_t *sample = row + (imformat.width(p) - 1) * vsformat.bytesPerSample;
 
-				for (unsigned j = imformat.plane[p].width; j < w; ++j) {
+				for (unsigned j = imformat.width(p); j < w; ++j) {
 					memcpy(row + j * vsformat.bytesPerSample, sample, vsformat.bytesPerSample);
 				}
 			}
@@ -238,29 +236,23 @@ void fix_bad_yuv_dimensions(const VideoFrame &vsframe, const imagine::FrameForma
 
 
 class ImageView : public FilterBase {
-	imagine::ImageDecoderRegistry m_registry;
-	imagine::FrameFormat m_imformat;
+	imaginexx::DecoderRegistry m_registry;
 	FormatString m_format_str;
 	VSVideoInfo m_vi;
 	int m_initial;
 
-	imagine::FrameFormat probe_image(const std::string &path) try
+	void probe_image(const std::string &path, imaginexx::FileFormat *format) try
 	{
-		std::unique_ptr<imagine::FileIOContext> io{ new imagine::FileIOContext{ path } };
-		std::unique_ptr<imagine::ImageDecoder> decoder = m_registry.create_decoder(path.c_str(), nullptr, std::move(io));
-
-		if (!decoder)
+		imaginexx::IOContext io{ imaginexx::IOContext::from_file_ro(path.c_str()) };
+		imaginexx::Decoder decoder{ m_registry.create_decoder(path.c_str(), nullptr, io.pass()) };
+		if (decoder.is_null())
 			throw std::runtime_error{ "no decoder for format" };
 
-		imagine::FrameFormat imformat = decoder->next_frame_format();
-		if (!imagine::is_constant_format(imformat))
+		decoder.next_frame_format(*format);
+		if (!format->is_constant_format())
 			throw std::runtime_error{ "decoder did not return a frame" };
-
-		return imformat;
-	} catch (const imagine::error::IOError &) {
-		translate_ioerror();
-	} catch (const imagine::error::Exception &e) {
-		throw std::runtime_error{ e.what() };
+	} catch (const imaginexx::im_error &e) {
+		translate_imerror(e);
 	}
 
 	VideoFrame decode_image(int n, const VapourCore &core) try
@@ -268,14 +260,15 @@ class ImageView : public FilterBase {
 		VideoFrame ret_frame;
 		VideoFrame alpha_frame;
 
-		std::unique_ptr<imagine::FileIOContext> io{ new imagine::FileIOContext{ m_format_str.format(m_initial + n) } };
-		std::unique_ptr<imagine::ImageDecoder> decoder = m_registry.create_decoder(io->path(), nullptr, std::move(io));
+		std::string path = m_format_str.format(m_initial + n);
+		imaginexx::IOContext io{ imaginexx::IOContext::from_file_ro(path.c_str()) };
+		imaginexx::Decoder decoder{ m_registry.create_decoder(path.c_str(), nullptr, io.pass()) };
+		if (decoder.is_null())
+			throw std::runtime_error{ "no decoder for format" };
 
-		if (!decoder)
-			throw std::runtime_error{ "no decoder for image" };
-
-		imagine::FrameFormat imformat = decoder->next_frame_format();
-		if (!imagine::is_constant_format(imformat))
+		imaginexx::FileFormat imformat{ imaginexx::FileFormat::create() };
+		decoder.next_frame_format(imformat);
+		if (!imformat.is_constant_format())
 			throw std::runtime_error{ "decoder did not return a frame" };
 
 		auto f = adjust_imformat(imformat, core);
@@ -286,38 +279,35 @@ class ImageView : public FilterBase {
 		if ((m_vi.width && m_vi.height && m_vi.format) && (w != m_vi.width || h != m_vi.height || vsformat != m_vi.format))
 			throw std::runtime_error{ "image format changed" };
 
-		bool alpha = has_alpha(imformat.color_family);
+		bool alpha = has_alpha(imformat.color_family());
 		ret_frame = core.new_video_frame(*vsformat, w, h);
 		if (alpha) {
 			const VSFormat *alpha_vsformat = core.register_format(cmGray, static_cast<VSSampleType>(vsformat->sampleType), vsformat->bitsPerSample, 0, 0);
 			alpha_frame = core.new_video_frame(*alpha_vsformat, w, h);
 		}
 
-		imagine::OutputBuffer imbuffer;
+		imaginexx::im_output_buffer imbuffer;
 		for (int p = 0; p < vsformat->numPlanes; ++p) {
 			imbuffer.data[p] = ret_frame.write_ptr(p);
 			imbuffer.stride[p] = ret_frame.stride(p);
 		}
 		if (alpha) {
-			imbuffer.data[imformat.plane_count - 1] = alpha_frame.write_ptr(0);
-			imbuffer.stride[imformat.plane_count - 1] = alpha_frame.stride(0);
+			imbuffer.data[imformat.plane_count() - 1] = alpha_frame.write_ptr(0);
+			imbuffer.stride[imformat.plane_count() - 1] = alpha_frame.stride(0);
 		}
-		decoder->decode(imbuffer);
+		decoder.decode(imbuffer);
 		fix_bad_yuv_dimensions(ret_frame, imformat);
 
 		if (alpha)
 			ret_frame.frame_props().set_prop("_Alpha", alpha_frame);
 
 		return ret_frame;
-	} catch (const imagine::error::IOError &) {
-		translate_ioerror();
-	} catch (const imagine::error::Exception &e) {
-		throw std::runtime_error{ e.what() };
+	} catch (const imaginexx::im_error &e) {
+		translate_imerror(e);
 	}
 public:
-	ImageView(void * = nullptr) : m_vi{}, m_initial{}
+	explicit ImageView(void *) : m_registry{ imaginexx::DecoderRegistry::create() }, m_vi{}, m_initial{}
 	{
-		m_registry.register_default_providers();
 	}
 
 	const char *get_name(int) noexcept override
@@ -363,9 +353,9 @@ public:
 
 		m_vi.numFrames = frame_count;
 		if (constant) {
-			imagine::FrameFormat imformat = probe_image(m_format_str.format(initial));
+			imaginexx::FileFormat imformat{ imaginexx::FileFormat::create() };
+			probe_image(m_format_str.format(initial), &imformat);
 			std::tie(m_vi.width, m_vi.height, m_vi.format) = adjust_imformat(imformat, core);
-			m_imformat = imformat;
 		}
 
 		return{ fmSerial, 0 };
