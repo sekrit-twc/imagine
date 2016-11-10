@@ -158,18 +158,12 @@ struct Arguments {
 };
 
 const ArgparseOption program_positional[] = {
-	{ OPTION_STRING, nullptr, "inpath", offsetof(Arguments, inpath), nullptr, "input image path" },
+	{ OPTION_STRING, nullptr, "inpath",    offsetof(Arguments, inpath),    nullptr, "input image path" },
 	{ OPTION_STRING, nullptr, "outprefix", offsetof(Arguments, outprefix), nullptr, "output image outprefix" },
+	{ OPTION_NULL }
 };
 
-const ArgparseCommandLine program_def = {
-	nullptr,
-	0,
-	program_positional,
-	sizeof(program_positional) / sizeof(program_positional[0]),
-	"testapp",
-	"decode images"
-};
+const ArgparseCommandLine program_def = { nullptr, program_positional, "testapp", "decode images" };
 
 } // namespace
 
@@ -179,8 +173,8 @@ int main(int argc, char **argv)
 	Arguments args{};
 	int ret;
 
-	if ((ret = argparse_parse(&program_def, &args, argc, argv)))
-		return ret == ARGPARSE_HELP ? 0 : ret;
+	if ((ret = argparse_parse(&program_def, &args, argc, argv)) < 0)
+		return ret == ARGPARSE_HELP_MESSAGE ? 0 : ret;
 
 	// For linkage only.
 	if (argc == -1)
