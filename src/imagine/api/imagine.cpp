@@ -179,7 +179,12 @@ void imagine_clear_last_error(void)
 
 imagine_file_format *imagine_file_format_alloc(void)
 {
-	return new imagine::FileFormat{};
+	try {
+		return new imagine::FileFormat{};
+	} catch (const std::bad_alloc &) {
+		handle_bad_alloc();
+		return nullptr;
+	}
 }
 
 void imagine_file_format_free(imagine_file_format *ptr)
@@ -500,7 +505,6 @@ imagine_error_code_e imagine_decoder_decode(imagine_decoder *ptr, const imagine_
 		buffer.data[p] = buf->data[p];
 		buffer.stride[p] = buf->stride[p];
 	}
-
 	assert_dynamic_type<imagine::ImageDecoder>(ptr)->decode(buffer);
 	EX_END
 }
