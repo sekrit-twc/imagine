@@ -122,7 +122,7 @@ typedef struct imagine_io_context imagine_io_context;
 
 imagine_io_context *imagine_io_context_from_file_ro(const char *path);
 
-imagine_io_context *imagine_io_context_from_memory(const void *buf, size_t n);
+imagine_io_context *imagine_io_context_from_memory(const void *buf, size_t n, const char *path);
 
 void imagine_io_context_free(imagine_io_context *ptr);
 

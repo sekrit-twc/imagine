@@ -81,6 +81,9 @@
     <ClCompile Include="..\..\src\imagine\provider\tiff_decoder.cpp">
       <Filter>Source Files\provider</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\imagine\common\memory_io.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\imagine\api\imagine.h">
@@ -136,6 +139,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\imagine\api\imagine++.hpp">
       <Filter>Header Files\api</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\imagine\common\memory_io.h">
+      <Filter>Header Files\common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

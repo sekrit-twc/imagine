@@ -9,6 +9,7 @@
 #include "common/format.h"
 #include "common/im_assert.h"
 #include "common/io_context.h"
+#include "common/memory_io.h"
 #include "imagine.h"
 
 namespace {
@@ -396,11 +397,19 @@ imagine_io_context *imagine_io_context_from_file_ro(const char *path)
 	}
 }
 
-imagine_io_context *imagine_io_context_from_memory(const void *buf, size_t n)
+imagine_io_context *imagine_io_context_from_memory(const void *buf, size_t n, const char *path)
 {
 	im_assert_d(buf && n, "null pointer");
-	g_last_error = IMAGINE_ERROR_CANNOT_OPEN_FILE;
-	return nullptr;
+
+	try {
+		return new imagine::MemoryIOContext{ buf, n, path ? path : "" };
+	} catch (const imagine::error::Exception &) {
+		handle_exception(std::current_exception());
+		return nullptr;
+	} catch (const std::bad_alloc &) {
+		handle_bad_alloc();
+		return nullptr;
+	}
 }
 
 void imagine_io_context_free(imagine_io_context *ptr)
