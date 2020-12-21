@@ -21,16 +21,11 @@
 #endif
 
 #ifdef _WIN32
-  #define LITTLE_ENDIAN
+  #define BIG_ENDIAN 1234
+  #define LITTLE_ENDIAN 4321
+  #define BYTE_ORDER LITTLE_ENDIAN
 #else
-  #include <endian.h>
-  #if __BYTE_ORDER == __BIG_ENDIAN
-    #define BIG_ENDIAN
-  #elif __BYTE_ORDER == __LITTLE_ENDIAN
-    #define LITTLE_ENDIAN
-  #else
-    #error bad endian
-  #endif
+  #include <sys/param.h>
 #endif // _WIN32
 
 namespace imagine {
@@ -49,7 +44,7 @@ const size_t BITMAPV5HEADER_SIZE = 124;
 
 const uint16_t BITMAP_MAGIC = ('M' << 8) | 'B';
 
-#ifdef BIG_ENDIAN
+#if BYTE_ORDER == BIG_ENDIAN
 uint16_t to_le(uint16_t x) { return __builtin_bswap16(x); }
 int32_t to_le(int32_t x) { return __builtin_bswap32(x); }
 uint32_t to_le(uint32_t x) { return __builtin_bswap32(x); }

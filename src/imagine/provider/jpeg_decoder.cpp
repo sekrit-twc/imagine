@@ -2,6 +2,7 @@
 #include <array>
 #include <csetjmp>
 #include <cstddef>
+#include <cstdio>
 #include <cstring>
 #include <exception>
 #include <tuple>
